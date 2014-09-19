@@ -33,7 +33,7 @@ public class FPSUpdate : MonoBehaviour
 	int c = 0;
 	void Update ()
 	{
-		c++;
+		if(c < ROLLING_AVERAGE_SAMPLES) c++;
 		
 		avg *= (float)(c < ROLLING_AVERAGE_SAMPLES ? c : ROLLING_AVERAGE_SAMPLES);
 		avg -= deltas[index];

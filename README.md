@@ -17,4 +17,4 @@ or
 - Import ProBuilder
 - Navigate to `ProCore/ProBuilder/Install/Packs/` and double-click `ProBuilder2-v2861-unity43`
 
-![](pipedreams_tutorial2.png?raw=true)
+![](pipedreams_tutorial2.PNG?raw=true)

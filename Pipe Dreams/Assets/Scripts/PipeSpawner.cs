@@ -30,7 +30,14 @@ public class PipeSpawner : MonoBehaviour
 	[SerializeField] int activePipes = 0;
 	[SerializeField] List<Pipe> finishedPipes = new List<Pipe>();	///< Pipes that have been built out and run out of moves are saved so that we can reset the screen.
 
+	RotateCamera rotateCam;
+
 #region Initialization
+
+	void Awake()
+	{
+		rotateCam = Camera.main.transform.GetComponent<RotateCamera>();
+	}
 
 	void Start()
 	{
@@ -69,7 +76,7 @@ public class PipeSpawner : MonoBehaviour
 	// GUI Settings vars
 	bool showSettings = false;
 	public Rect SettingsWindowRect { get { return settingsWindowRect; } }
-	Rect settingsWindowRect = new Rect(10, 20, 180, 200);
+	Rect settingsWindowRect = new Rect(10, 20, 200, 200);
 
 	void OnGUI()
 	{
@@ -171,10 +178,22 @@ public class PipeSpawner : MonoBehaviour
 				SetSpeed(pipeSpeed);
 		}
 
+		GUILayout.Space(6);
+
+		GUILayout.Label("Camera Orbit Speed: " + rotateCam.idleSpeed.ToString("F2"));
+		{
+			rotateCam.idleSpeed = GUILayout.HorizontalSlider(rotateCam.idleSpeed, .01f, 10f);
+		}
+
 		if( GUILayout.Button("Reset") )
 		{
-			foreach(Pipe pipe in FindObjectsOfType(typeof(Pipe)).Where(x => !((Pipe)x).IsPaused()))
-				pipe.EndPipe();
+			activePipes = 0;
+			finishedPipes.Clear();
+
+			foreach(Pipe pipe in FindObjectsOfType(typeof(Pipe)))
+				GameObject.Destroy(pipe.gameObject);
+
+			StartCoroutine( SpawnPipes() );
 		}
 
 		if(doUpdate)

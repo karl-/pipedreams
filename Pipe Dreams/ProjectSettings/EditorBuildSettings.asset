@@ -6,4 +6,4 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Pipe Dreams Screensaver/Scenes/Screensaver.unity
+    path: Assets/Scenes/Screensaver.unity

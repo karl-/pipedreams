@@ -13,8 +13,7 @@ public class Pipe : MonoBehaviour
 #region Members
 
 	int maximumPipeTurns = 200;							///< How many turns to make before ending this pipe.
-	const int MAX_TURNS_PER_SEGMENT = 5;				///< Extruding from large pb_Objects can be slow - so every 10 turns detach to a new object.
-	// const int MAX_TURNS_PER_SEGMENT = 10;				///< Extruding from large pb_Objects can be slow - so every 10 turns detach to a new object.
+	const int MAX_TURNS_PER_SEGMENT = 10;				///< Extruding from large pb_Objects can be slow - so every 10 turns detach to a new object.
 
 	float minimumStretchDistance = 1f;					///< Minimum distance a pipe stretch can be.
 	float maximumStretchDistance = 10f;					///< Maximum distance a pipe stretch can be.
@@ -298,7 +297,7 @@ public class Pipe : MonoBehaviour
 		neighborFaces.RemoveAll(x => System.Array.IndexOf(movingFaces, x) > -1);
 
 		// Reset currentDistanceTraveled
-		currentDistanceTraveled = 0f;
+		currentDistanceTraveled = .0001f;
 
 		// If this is a turn, increment the turn count.
 		if(isTurn) turnCount++;

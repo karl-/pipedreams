@@ -21,7 +21,7 @@ public class Pipe : MonoBehaviour
 
 	pb_Object pb;										///< Cache the pb_Object component
 	pb_Face[] movingFaces;								///< The faces we're current extruding
-	List<pb_Face> neighborFaces = new List<pb_Face>();	///< All faces connected to the extruded faces (they'll need to have their UVs refreshed)
+	pb_Face[] neighborFaces = new pb_Face[0];			///< All faces connected to the extruded faces (they'll need to have their UVs refreshed)
 	
 	float size = 1f;
 	int[] selectedTriangles;							///< All the triangles contained in the movingFaces array.
@@ -227,7 +227,7 @@ public class Pipe : MonoBehaviour
 			bool invalidDirection = true;
 
 			List<int> invalidFaces = new List<int>();
-			int faceCount = neighborFaces.Count > 0 ? neighborFaces.Count : pb.faces.Length;
+			int faceCount = neighborFaces.Length > 0 ? neighborFaces.Length : pb.faces.Length;
 
 			/**
 			 *	If the face chosen to extrude from will collide with either the bounds or another pipe, try extruding from a different face.
@@ -250,7 +250,7 @@ public class Pipe : MonoBehaviour
 				} while(invalidFaces.Contains(faceIndex));
 
 				// If this is the first run, neighborFaces won't be populated yet, so just choose a random face to start with.
-				if(neighborFaces.Count > 0)
+				if(neighborFaces.Length > 0)
 					movingFaces = new pb_Face[] { neighborFaces[ faceIndex ] };
 				else
 					movingFaces = new pb_Face[] { pb.faces[ faceIndex ] };
@@ -286,7 +286,11 @@ public class Pipe : MonoBehaviour
 		// normals and tangents to calculate properly (the Refresh() call does this for you).  The last
 		// out param in Extrude is optional, and is populated with the newly created faces on each
 		// perimeter edge of the extuded faces.
-		pb.Extrude(movingFaces, .0001f, out neighborFaces);
+		pb.Extrude(movingFaces, .0001f, true, out neighborFaces);
+
+		// As of 2.4, mesh operation calls no longer rebuild the mesh.  It is necessary to call ToMesh()
+		// after any elements are added or removed prior to Refresh() now.
+		pb.ToMesh();
 
 		// Refresh the normals, tangents, and uvs.  In the Editor, you should also call pb.GenerateUV2(),
 		// but since this is runtime we don't care about UV2 channels.
@@ -294,7 +298,8 @@ public class Pipe : MonoBehaviour
 
 		 // Remove the currently moving faces from the connectedFaces array, since we don't want to go
 		 // direction twice.
-		neighborFaces.RemoveAll(x => System.Array.IndexOf(movingFaces, x) > -1);
+		// neighborFaces.RemoveAll(x => System.Array.IndexOf(movingFaces, x) > -1);
+		neighborFaces = neighborFaces.Where( x => System.Array.IndexOf(movingFaces, x) < 0 ).ToArray();
 
 		// Reset currentDistanceTraveled
 		currentDistanceTraveled = .0001f;
@@ -388,6 +393,9 @@ public class Pipe : MonoBehaviour
 		pb.DeleteFaces(primary);
 		detachedObject.DeleteFaces(inverse);
 
+		pb.ToMesh();
+		detachedObject.ToMesh();
+
 		pb.Refresh();
 		detachedObject.Refresh();
 	
@@ -443,6 +451,9 @@ public class Pipe : MonoBehaviour
 			parent.FadeOut(fadeTime, delay, fadeMaterial);
 
 		pb.SetFaceMaterial(pb.faces, fadeMaterial);
+		
+		pb.ToMesh();
+		pb.Refresh();
 
 		this.enabled = true;
 
@@ -458,6 +469,7 @@ public class Pipe : MonoBehaviour
 		
 		// we *do* want to instance the material in this case.
 		Material mat = GetComponent<MeshRenderer>().material;
+
 		Color col = mat.color;
 
 		float timer = 0f;
